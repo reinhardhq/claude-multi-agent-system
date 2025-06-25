@@ -73,24 +73,54 @@ graph TD
 
 ---
 
-## 🚀 クイックスタート
+## 🚀 クイックスタート（任意のプロジェクト向け）
 
-### 共通セットアップ
+### 前提条件
 
-#### 1. システムセットアップ（30秒）
+- Git がインストールされていること
+- tmux がインストールされていること
+- Claude CLI がインストール・認証済みであること
+
+### セットアップ手順
+
+#### 1. Claude Multi-Agent System のクローン
 
 ```bash
-cd claude_multi_agent_system/scripts
-./setup-multiagent.sh
+# 方法1: ツールディレクトリにクローン（推奨）
+mkdir -p ~/tools
+cd ~/tools
+git clone https://github.com/your-repo/claude-multi-agent-system.git
+
+# PATHに追加
+export PATH=$PATH:~/tools/claude-multi-agent-system/scripts
 ```
 
-#### 2. AIエージェント起動（30秒）
+#### 2. プロジェクトの設定初期化
 
 ```bash
-./quick-start-multiagent.sh
+# 開発したいプロジェクトに移動
+cd /path/to/your/project
+
+# 設定を初期化（対話形式）
+~/tools/claude-multi-agent-system/scripts/config-manager.sh init
 ```
 
-#### 3. システム接続
+#### 3. Git Worktree のセットアップ
+
+```bash
+# 設定に基づいてWorktreeを作成
+~/tools/claude-multi-agent-system/scripts/worktree-config.sh setup
+```
+
+#### 4. tmux セッションとAIエージェントの起動
+
+```bash
+cd ~/tools/claude-multi-agent-system/scripts
+./setup-multiagent.sh    # tmuxセッション作成
+./quick-start-multiagent.sh  # AIエージェント起動
+```
+
+#### 5. システム接続
 
 ```bash
 tmux attach-session -t multiagent
@@ -422,45 +452,190 @@ claude_multi_agent_system/
 ├── boss/
 │   └── boss.md              # BOSS役割定義
 ├── worker/
-│   ├── worker.md            # WORKER汎用役割定義
-│   └── legacy-dev-c/        # 旧dev-cファイル（参考用）
+│   └── worker.md            # WORKER汎用役割定義
 ├── scripts/
-│   ├── setup-multiagent.sh      # システムセットアップ
+│   ├── setup-multiagent.sh      # tmuxセッションセットアップ
 │   ├── quick-start-multiagent.sh # AIエージェント起動
+│   ├── config-manager.sh        # 設定管理（NEW）
+│   ├── worktree-config.sh       # Worktree管理（NEW）
+│   ├── assignment-manager.sh    # タスク分配管理（NEW）
 │   ├── agent-send.sh            # メッセージ送信
-│   ├── plan-distributor.sh      # 方式案配布
+│   ├── boss-commander.sh        # Boss操作パネル
 │   ├── progress-tracker.sh      # 進捗管理
-│   └── master-controller.sh     # 統合制御
-├── logs/                    # ログファイル
-├── reports/                 # レポート出力
-├── planlist.md             # 方式案リスト
-├── WORKFLOW_GUIDE.md       # ワークフローガイド
-├── QUICK_START.md          # クイックスタートガイド
-└── README.md               # このファイル
+│   └── parallel-dev-manager.sh  # 並列開発管理
+├── config/
+│   └── project.config.example   # 設定ファイルテンプレート
+├── assignments/                 # タスク分配（タイムスタンプ管理）
+│   ├── 20250625/               # 日付別フォルダ
+│   │   └── 174532/             # タイムスタンプ別フォルダ
+│   │       ├── worker1_approach_1.md
+│   │       └── ...
+│   └── current -> ...          # 最新分配へのシンボリックリンク
+├── reports/                    # レポート（タイムスタンプ管理）
+│   └── 20250625/
+│       └── 174532/
+├── logs/                       # ログファイル
+├── docs/
+│   └── CONFIGURATION_GUIDE.md  # 設定ガイド
+└── README.md                   # このファイル
+
+## 作業ディレクトリ構成（プロジェクト側）
+
+your-project/
+├── .claude-multi-agent/        # プロジェクト固有設定
+│   └── project.config         # プロジェクト設定ファイル
+├── worktrees/                 # Worker別Git Worktree
+│   ├── worker1/               # feature/worker-worker1-dev
+│   ├── worker2/               # feature/worker-worker2-dev
+│   └── worker3/               # feature/worker-worker3-dev
+└── planlist.md               # 方式案リスト
+
+## 中間成果物（/tmp）
+
+/tmp/worker-outputs/
+├── worker1/
+│   └── 20250625_174532/       # タイムスタンプ別作業ディレクトリ
+│       ├── src/               # ソースコード
+│       ├── docs/              # ドキュメント
+│       ├── tests/             # テストコード
+│       └── build/             # ビルド成果物
+├── worker2/
+└── worker3/
+```
+
+## 🔄 開発ワークフロー
+
+### 1. プロジェクトセットアップ（初回のみ）
+
+```bash
+# プロジェクトで設定初期化
+cd /path/to/your/project
+~/tools/claude-multi-agent-system/scripts/config-manager.sh init
+
+# Worktree作成
+~/tools/claude-multi-agent-system/scripts/worktree-config.sh setup
+```
+
+### 2. 開発サイクル
+
+#### Step 1: 方式案作成（planlist.md）
+
+```bash
+# プロジェクトルートで planlist.md を作成
+vim planlist.md
+```
+
+#### Step 2: タスク分配
+
+```bash
+cd ~/tools/claude-multi-agent-system/scripts
+
+# tmuxセッション起動
+./setup-multiagent.sh
+./quick-start-multiagent.sh
+
+# 方式案を分析・分配
+./boss-commander.sh analyze
+./boss-commander.sh assign
+```
+
+#### Step 3: 開発進行
+
+```bash
+# 進捗確認
+./agent-send.sh team "進捗を報告してください"
+
+# 個別指示
+./agent-send.sh worker1 "UIコンポーネントの実装を開始してください"
+```
+
+#### Step 4: 成果物統合
+
+```bash
+# 各Workerの成果を確認
+./worktree-config.sh status
+
+# マージ準備
+cd /path/to/your/project
+git checkout main
+git merge feature/worker-worker1-dev
+```
+
+### 3. ファイル管理
+
+#### Assignments（タスク分配）
+
+```bash
+# 新しい分配は自動的にタイムスタンプ付きフォルダに保存
+assignments/
+├── 20250625/
+│   ├── 103000/  # 10:30:00の分配
+│   └── 153000/  # 15:30:00の分配
+└── current -> 20250625/153000  # 最新へのリンク
+
+# 古い分配をクリーンアップ（7日以上前）
+./assignment-manager.sh clean 7
+```
+
+#### 中間成果物（/tmp）
+
+```bash
+# Workerは中間成果物を/tmpに保存
+/tmp/worker-outputs/worker1/20250625_153000/
+├── src/      # 作業中のソースコード
+├── docs/     # 作業メモ
+├── tests/    # テストコード
+└── build/    # ビルド成果物
+
+# 完成したら worktree にコミット
+cd ~/project/worktrees/worker1
+git add .
+git commit -m "Complete implementation"
 ```
 
 ## 🔧 高度な機能
 
-### 方式案管理システム
-
-複数の開発アプローチを並行して検討・実装できます：
+### 設定管理
 
 ```bash
-# 方式案の自動配布
-./plan-distributor.sh auto
+# 設定確認
+./config-manager.sh show
 
-# 進捗追跡
-./progress-tracker.sh report standard
+# 設定編集
+./config-manager.sh edit
 
-# 統合管理
-./master-controller.sh
+# 設定検証
+./config-manager.sh validate
+
+# 環境変数エクスポート
+source <(./config-manager.sh export)
 ```
 
-### 品質管理
+### タスク分配管理
 
-各WORKERが専門分野で品質を保証：
+```bash
+# 分配履歴確認
+./assignment-manager.sh list
 
-- **WORKER1-3**: 担当タスクに応じた品質保証（フルスタック対応）
+# 古い分配のクリーンアップ
+./assignment-manager.sh clean 30
+
+# 分配のアーカイブ
+./assignment-manager.sh archive
+```
+
+### 並列開発管理
+
+```bash
+# Worktree状態確認
+./worktree-config.sh status
+
+# ブランチ同期
+./worktree-config.sh sync
+
+# Worktreeクリーンアップ
+./worktree-config.sh cleanup
+```
 
 
 ## 🎯 ベストプラクティス

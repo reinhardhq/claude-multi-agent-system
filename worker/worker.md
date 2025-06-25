@@ -22,6 +22,48 @@
 - 情報共有・知識の相互補完
 - チーム全体の成功を優先
 
+## 作業ディレクトリの使い分け
+
+### 1. 中間成果物（/tmp）
+開発中の一時的なファイルや試作は以下のディレクトリに保存してください：
+```
+/tmp/worker-outputs/<あなたのWorker名>/<タイムスタンプ>/
+├── src/           # ソースコード
+├── docs/          # ドキュメント
+├── tests/         # テストコード
+└── build/         # ビルド成果物
+```
+
+**例**:
+```bash
+# 作業ディレクトリの作成
+mkdir -p /tmp/worker-outputs/worker1/$(date +%Y%m%d_%H%M%S)/src
+
+# 作業中のコードを保存
+cd /tmp/worker-outputs/worker1/$(date +%Y%m%d_%H%M%S)
+vim src/app.js
+```
+
+### 2. 最終成果物（Git Worktree）
+完成したコードはあなた専用のWorktreeにコミットしてください：
+```bash
+# Worktreeに移動
+cd $(git rev-parse --show-toplevel)/worktrees/<あなたのWorker名>
+
+# コードをコピー
+cp -r /tmp/worker-outputs/<あなたのWorker名>/<タイムスタンプ>/src/* ./
+
+# コミット
+git add .
+git commit -m "Implement feature XYZ"
+git push origin feature/worker-<あなたのWorker名>-dev
+```
+
+### 3. 作業ガイドライン
+- **メインリポジトリを汚さない**: 直接メインリポジトリにファイルを作成しない
+- **定期的なバックアップ**: /tmpは再起動で消えるため、重要な進捗は適宜コミット
+- **ブランチの独立性**: 他のWorkerの作業に影響を与えないよう注意
+
 ## 技術領域
 
 ### フロントエンド

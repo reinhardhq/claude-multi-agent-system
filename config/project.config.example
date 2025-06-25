@@ -1,0 +1,70 @@
+# Claude Multi-Agent System Project Configuration
+# Copy this file to project.config and customize for your project
+
+# ===== Project Information =====
+# The target project to work on
+PROJECT_NAME="My Awesome Project"
+PROJECT_ROOT="/path/to/your/project"
+PROJECT_REPOSITORY="https://github.com/username/project.git"
+
+# ===== Multi-Agent System Paths =====
+# Path to claude-multi-agent-system installation
+CLAUDE_SYSTEM_PATH="/path/to/claude-multi-agent-system"
+
+# ===== Worktree Configuration =====
+# Base directory for worker worktrees (relative to PROJECT_ROOT or absolute)
+WORKTREE_BASE="worktrees"
+
+# Branch naming pattern for workers
+# Available variables: {worker} = worker1, worker2, worker3
+BRANCH_PATTERN="feature/{worker}-dev"
+
+# ===== Worker Configuration =====
+# Number of workers (default: 3)
+WORKER_COUNT=3
+
+# Worker names (space-separated)
+WORKER_NAMES="worker1 worker2 worker3"
+
+# ===== Agent Model Configuration =====
+# Default Claude model for all agents
+DEFAULT_MODEL="claude-4-sonnet"
+
+# Model per role (optional overrides)
+PRESIDENT_MODEL="claude-4-sonnet"
+BOSS_MODEL="claude-4-sonnet"
+WORKER_MODEL="claude-4-sonnet"
+
+# ===== Development Settings =====
+# Auto-commit changes
+AUTO_COMMIT=false
+COMMIT_INTERVAL="30m"  # 30 minutes
+
+# Progress reporting
+PROGRESS_REPORT_INTERVAL="10m"  # 10 minutes
+
+# ===== Integration Settings =====
+# GitHub integration
+GITHUB_CREATE_PR=false
+GITHUB_PR_TEMPLATE=".github/pull_request_template.md"
+
+# Slack notifications (optional)
+SLACK_WEBHOOK_URL=""
+SLACK_CHANNEL="#dev-multiagent"
+
+# ===== Advanced Settings =====
+# tmux session name
+SESSION_NAME="multiagent"
+
+# Log level (DEBUG, INFO, WARN, ERROR)
+LOG_LEVEL="INFO"
+
+# Log directory
+LOG_DIR="${CLAUDE_SYSTEM_PATH}/logs"
+
+# ===== Project-Specific Hooks =====
+# Scripts to run at various stages (optional)
+HOOK_PRE_SETUP=""
+HOOK_POST_SETUP=""
+HOOK_PRE_BUILD=""
+HOOK_POST_BUILD=""

@@ -1,5 +1,15 @@
 # Claude Multi-Agent System .gitignore
 
+# === プロジェクト固有の除外 ===
+# 中間成果物とテストデータ
+/assignments/
+/reports/
+/logs/
+/archives/
+/worktrees/
+planlist.md
+.claude-multi-agent/
+
 # === ログ・レポート・一時ファイル ===
 logs/*.log
 logs/debug/
