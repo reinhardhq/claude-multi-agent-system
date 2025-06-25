@@ -10,6 +10,11 @@
 planlist.md
 .claude-multi-agent/
 
+# テストプロジェクト（サブモジュール）
+simple-weather-app/
+test-projects/
+.gitmodules
+
 # === ログ・レポート・一時ファイル ===
 logs/*.log
 logs/debug/
