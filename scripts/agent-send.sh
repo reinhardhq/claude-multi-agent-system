@@ -1,7 +1,11 @@
 #!/bin/bash
-
-# Agent Message Sender
-# President/Boss/Worker 3層構造対応版 + BOSS権限強化
+# ==============================================================================
+# Agent Message Sender - エージェント間メッセージ送信システム
+# ==============================================================================
+# Description: President/Boss/Worker 3層構造対応のメッセージ送信ツール
+# Usage: agent-send.sh <target> [message]
+# Dependencies: tmux, Claude CLI
+# ==============================================================================
 
 set -e
 

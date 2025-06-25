@@ -1,7 +1,11 @@
 #!/bin/bash
-
-# Assignment Manager with Timestamp-based Organization
-# タイムスタンプベースで assignments を整理管理
+# ==============================================================================
+# Assignment Manager - タイムスタンプベースタスク管理システム
+# ==============================================================================
+# Description: タイムスタンプベースでassignmentsを整理・管理しノイズを削減
+# Usage: assignment-manager.sh [init|create|clean|archive|list]
+# Dependencies: None
+# ==============================================================================
 
 set -e
 

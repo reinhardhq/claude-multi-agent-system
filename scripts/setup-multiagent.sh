@@ -1,7 +1,11 @@
 #!/bin/bash
-
-# Claude Multi-Agent System Setup Script
-# President/Boss/Worker 3層構造対応版
+# ==============================================================================
+# Setup Multi-Agent - Claudeマルチエージェントシステムセットアップ
+# ==============================================================================
+# Description: President/Boss/Worker 3層構造のマルチエージェントシステムを設定
+# Usage: setup-multiagent.sh
+# Dependencies: tmux, curl
+# ==============================================================================
 
 set -e
 

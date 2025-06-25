@@ -1,7 +1,11 @@
 #!/bin/bash
-
-# Claude Multi-Agent System Quick Start
-# President/Boss/Worker 3層構造対応版
+# ==============================================================================
+# Quick Start Multi-Agent - Claudeマルチエージェントシステムクイックスタート
+# ==============================================================================
+# Description: President/Boss/Worker 3層構造のマルチエージェントシステムを素早く起動
+# Usage: quick-start-multiagent.sh
+# Dependencies: tmux, curl
+# ==============================================================================
 
 set -e
 

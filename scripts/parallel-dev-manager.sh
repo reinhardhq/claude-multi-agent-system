@@ -1,7 +1,11 @@
 #!/bin/bash
-
+# ==============================================================================
 # Parallel Development Manager - 並列開発統合管理システム
-# Git Worktree + Team Composition + Multi-Agent 開発フローの統合管理
+# ==============================================================================
+# Description: Git Worktree + Team Composition + Multi-Agent 開発フローの統合管理
+# Usage: parallel-dev-manager.sh [init|create|compose|status|deploy|cleanup]
+# Dependencies: git, tmux, curl, jq
+# ==============================================================================
 
 set -e
 

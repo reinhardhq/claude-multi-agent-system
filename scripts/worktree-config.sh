@@ -1,7 +1,11 @@
 #!/bin/bash
-
-# Worktree Manager with Configuration Support
-# 設定ファイルベースのWorktree管理
+# ==============================================================================
+# Worktree Config - 設定ファイルベースのWorktree管理
+# ==============================================================================
+# Description: 設定ファイルを使用したGit Worktreeの管理システム
+# Usage: worktree-config.sh [create|remove|status|sync|cleanup]
+# Dependencies: git, jq
+# ==============================================================================
 
 set -e
 

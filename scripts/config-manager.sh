@@ -1,7 +1,11 @@
 #!/bin/bash
-
-# Configuration Manager for Claude Multi-Agent System
-# Manages project configuration files and environment setup
+# ==============================================================================
+# Configuration Manager - Claudeマルチエージェントシステム設定管理
+# ==============================================================================
+# Description: プロジェクト設定ファイルと環境セットアップを管理
+# Usage: config-manager.sh [create|update|load|show]
+# Dependencies: git, jq
+# ==============================================================================
 
 set -e
 
