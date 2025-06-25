@@ -1,0 +1,72 @@
+# Claude Multi-Agent System .gitignore
+
+# === ログ・レポート・一時ファイル ===
+logs/*.log
+logs/debug/
+logs/error/
+logs/session/
+reports/*.tmp
+reports/temp_*
+*.tmp
+*.temp
+
+# === tmux関連 ===
+.tmux/
+tmux.conf
+tmux-session.log
+
+# === メッセージング関連 ===
+messages/inbox/*/
+messages/outbox/*/
+messages/temp/
+*.msg.processing
+
+# === ワークスペース関連 ===
+worktrees/
+.worker-config
+.assignment-*
+
+# === システム・OS関連 ===
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# === エディタ・IDE関連 ===
+.vscode/
+.cursor/
+.idea/
+*.swp
+*.swo
+*~
+
+# === Node.js関連（必要に応じて） ===
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# === 環境設定 ===
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# === バックアップファイル ===
+*.backup
+*.bak
+*.backup.*
+
+# === プロセス・実行関連 ===
+*.pid
+*.lock
+
+# === Git関連 ===
+.git/hooks/
+.git/info/
+.git/logs/
+.git/refs/remotes/ 
