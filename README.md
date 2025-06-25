@@ -95,7 +95,18 @@ git clone https://github.com/your-repo/claude-multi-agent-system.git
 export PATH=$PATH:~/tools/claude-multi-agent-system/scripts
 ```
 
-#### 2. プロジェクトの設定初期化
+#### 2. プロジェクトの初期化（新機能！）
+
+```bash
+# 任意のプロジェクトで実行
+cd /path/to/your-project
+claude-multi-agent-init.sh
+
+# または、カスタムオプション付き
+claude-multi-agent-init.sh --workers 2 --model claude-4o-latest
+```
+
+#### 3. プロジェクトの設定（従来の方法）
 
 ```bash
 # 開発したいプロジェクトに移動
@@ -263,6 +274,42 @@ planlist.mdの例：
 - `Ctrl+B → 1` : チームウィンドウに切り替え
 - `Ctrl+B → 矢印` : ペイン間移動
 - `Ctrl+B → d` : セッションからデタッチ
+
+## 🆕 新機能（改善版）
+
+### 📊 リアルタイム進捗モニター
+
+```bash
+# プロジェクトの進捗をリアルタイムで監視
+./monitor-dashboard.sh
+
+# 更新間隔を指定（デフォルト: 5秒）
+./monitor-dashboard.sh --interval 10
+```
+
+### 📋 柔軟なPlanlist解析
+
+```bash
+# 様々なフォーマットのplanlist.mdを解析
+./planlist-parser.sh parse /path/to/planlist.md
+
+# タスクを自動的にWorkerに割り当て
+./planlist-parser.sh assign /path/to/planlist.md
+
+# 現在の割り当て状況を確認
+./planlist-parser.sh check
+```
+
+### 🚀 簡単初期化スクリプト
+
+```bash
+# 任意のプロジェクトで一発初期化
+cd /your/project
+claude-multi-agent-init.sh
+
+# カスタマイズ例
+claude-multi-agent-init.sh --workers 2 --model claude-4o-latest
+```
 
 ## 📤 メッセージ送信
 

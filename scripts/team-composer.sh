@@ -127,11 +127,11 @@ extract_required_fields() {
     
     # 方式案セクションを抽出（次の方式案または終端まで）
     if [[ "$approach_num" == "1" ]]; then
-        awk "/^## 方式案${approach_num}:/,/^## 方式案2:/{if(/^## 方式案2:/) exit; print}END{if(!found) print}' "$PLANLIST_FILE" > "$temp_file"
+        awk "/^## 方式案${approach_num}:/,/^## 方式案2:/{if(/^## 方式案2:/) exit; print}END{if(!found) print}" "$PLANLIST_FILE" > "$temp_file"
     elif [[ "$approach_num" == "2" ]]; then
-        awk "/^## 方式案${approach_num}:/,/^## 方式案3:/{if(/^## 方式案3:/) exit; print}END{if(!found) print}' "$PLANLIST_FILE" > "$temp_file"
+        awk "/^## 方式案${approach_num}:/,/^## 方式案3:/{if(/^## 方式案3:/) exit; print}END{if(!found) print}" "$PLANLIST_FILE" > "$temp_file"
     else
-        awk "/^## 方式案${approach_num}:/,/^## 🔒/{if(/^## 🔒/) exit; print}END{if(!found) print}' "$PLANLIST_FILE" > "$temp_file"
+        awk "/^## 方式案${approach_num}:/,/^## 🔒/{if(/^## 🔒/) exit; print}END{if(!found) print}" "$PLANLIST_FILE" > "$temp_file"
     fi
     
     # 必須項目を抽出
@@ -181,11 +181,11 @@ extract_freeform_details() {
     # 方式案セクションを抽出してから詳細部分を抽出
     local section_file="/tmp/approach_${approach_num}_section.txt"
     if [[ "$approach_num" == "1" ]]; then
-        awk "/^## 方式案${approach_num}:/,/^## 方式案2:/{if(/^## 方式案2:/) exit; print}END{if(!found) print}' "$PLANLIST_FILE" > "$section_file"
+        awk "/^## 方式案${approach_num}:/,/^## 方式案2:/{if(/^## 方式案2:/) exit; print}END{if(!found) print}" "$PLANLIST_FILE" > "$section_file"
     elif [[ "$approach_num" == "2" ]]; then
-        awk "/^## 方式案${approach_num}:/,/^## 方式案3:/{if(/^## 方式案3:/) exit; print}END{if(!found) print}' "$PLANLIST_FILE" > "$section_file"
+        awk "/^## 方式案${approach_num}:/,/^## 方式案3:/{if(/^## 方式案3:/) exit; print}END{if(!found) print}" "$PLANLIST_FILE" > "$section_file"
     else
-        awk "/^## 方式案${approach_num}:/,/^## 🔒/{if(/^## 🔒/) exit; print}END{if(!found) print}' "$PLANLIST_FILE" > "$section_file"
+        awk "/^## 方式案${approach_num}:/,/^## 🔒/{if(/^## 🔒/) exit; print}END{if(!found) print}" "$PLANLIST_FILE" > "$section_file"
     fi
     
     # 方式案詳細セクションを抽出
