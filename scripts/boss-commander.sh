@@ -82,6 +82,11 @@ show_usage() {
     echo -e "  ${GREEN}support${NC} <Worker> - 個別支援"
     echo -e "  ${GREEN}escalate${NC}         - PRESIDENT報告"
     echo ""
+    echo -e "${GREEN}■ 評価・選定${NC}"
+    echo -e "  ${GREEN}evaluate${NC}         - 全Worker成果物評価"
+    echo -e "  ${GREEN}compare${NC}          - 複数アプローチ比較"
+    echo -e "  ${GREEN}decide${NC}           - 最適アプローチ選定"
+    echo ""
     echo "例:"
     echo -e "  ${YELLOW}$0 analyze${NC}                 # planlist.md分析"
     echo -e "  ${YELLOW}$0 assign${NC}                  # 自動分配"
@@ -742,6 +747,250 @@ BOSS
     echo -e "${GREEN}✅ Worker間調整指示送信完了${NC}"
 }
 
+# 全Workerの成果物を評価
+evaluate_all_workers() {
+    show_boss_logo
+    echo -e "${CYAN}📊 全Worker成果物評価${NC}"
+    echo ""
+    
+    # team-composer.shの収集機能を使用
+    echo -e "${YELLOW}⏳ Worker成果物を収集中...${NC}"
+    "$SCRIPT_DIR/team-composer.sh" collect
+    
+    # 評価メッセージ
+    local evaluation_message="
+📊 【BOSS評価開始】$(date '+%Y-%m-%d %H:%M')
+
+各Workerの皆さん、これまでの実装お疲れ様でした。
+これよりBOSSとして全体評価を実施します。
+
+📋 評価観点：
+1. 実装完了度
+2. 技術的品質
+3. ドキュメント充実度
+4. テスト網羅性
+5. パフォーマンス
+6. 保守性・拡張性
+
+🎯 評価プロセス：
+- 各実装を客観的に評価
+- 長所と改善点を明確化
+- 最適なアプローチを選定
+
+評価結果は後ほど共有します。
+引き続きよろしくお願いします。
+
+---
+BOSS
+    "
+    
+    # 評価開始をWorkerに通知
+    for worker in worker1 worker2 worker3; do
+        send_instruction_to_worker "$worker" "$evaluation_message"
+    done
+    
+    echo -e "${GREEN}✅ 評価プロセス開始${NC}"
+    echo -e "${YELLOW}💡 ヒント: 評価結果は reports/comparison_*.md に保存されます${NC}"
+}
+
+# 複数アプローチを比較分析
+compare_worker_approaches() {
+    show_boss_logo
+    echo -e "${CYAN}🔍 複数アプローチ比較分析${NC}"
+    echo ""
+    
+    # team-composer.shの比較機能を使用
+    echo -e "${YELLOW}⏳ アプローチを比較分析中...${NC}"
+    "$SCRIPT_DIR/team-composer.sh" compare
+    
+    # 比較結果をWorkerに共有
+    local comparison_message="
+🔍 【アプローチ比較結果共有】$(date '+%Y-%m-%d %H:%M')
+
+各Workerの実装アプローチを比較分析しました。
+
+📊 比較結果：
+- 各アプローチの長所・短所を明確化
+- 技術的な優位性を評価
+- 実装の完成度を確認
+
+詳細な比較レポートを確認し、
+相互に学び合える点を見つけてください。
+
+🎯 次のステップ：
+1. 他のアプローチから学べる点を検討
+2. 自身の実装の改善余地を確認
+3. 統合に向けた準備
+
+チーム全体での成長を目指しましょう！
+
+---
+BOSS
+    "
+    
+    # 比較結果をWorkerに通知
+    for worker in worker1 worker2 worker3; do
+        send_instruction_to_worker "$worker" "$comparison_message"
+    done
+    
+    echo -e "${GREEN}✅ 比較分析完了${NC}"
+}
+
+# 最適アプローチを選定
+decide_best_approach() {
+    show_boss_logo
+    echo -e "${CYAN}🏆 最適アプローチ選定${NC}"
+    echo ""
+    
+    # 最新の比較レポートを確認
+    local latest_comparison=$(ls -t "$CLAUDE_SYSTEM_ROOT/reports"/comparison_*.md 2>/dev/null | head -n1)
+    
+    if [[ -z "$latest_comparison" ]]; then
+        echo -e "${YELLOW}⚠️  比較レポートが見つかりません${NC}"
+        echo -e "${CYAN}まず 'compare' コマンドを実行してください${NC}"
+        return 1
+    fi
+    
+    echo -e "${CYAN}🎯 最適アプローチを選定してください${NC}"
+    echo -e "${YELLOW}利用可能なWorker:${NC}"
+    echo -e "  1) worker1 - UI/UXアプローチ"
+    echo -e "  2) worker2 - Backendアプローチ"
+    echo -e "  3) worker3 - Test中心アプローチ"
+    echo -e "  4) hybrid  - 複数アプローチの統合"
+    echo ""
+    echo -e "${CYAN}選択 (1-4):${NC}"
+    read -r choice
+    
+    local selected_approach=""
+    local decision_reason=""
+    
+    case "$choice" in
+        1)
+            selected_approach="worker1"
+            echo -e "${CYAN}選定理由を入力してください:${NC}"
+            read -r decision_reason
+            ;;
+        2)
+            selected_approach="worker2"
+            echo -e "${CYAN}選定理由を入力してください:${NC}"
+            read -r decision_reason
+            ;;
+        3)
+            selected_approach="worker3"
+            echo -e "${CYAN}選定理由を入力してください:${NC}"
+            read -r decision_reason
+            ;;
+        4)
+            selected_approach="hybrid"
+            echo -e "${CYAN}統合方針を入力してください:${NC}"
+            read -r decision_reason
+            ;;
+        *)
+            echo -e "${RED}❌ 無効な選択です${NC}"
+            return 1
+            ;;
+    esac
+    
+    # 決定事項を文書化
+    local decision_file="$CLAUDE_SYSTEM_ROOT/reports/decision_$(date +%Y%m%d_%H%M%S).md"
+    cat > "$decision_file" << EOF
+# 🏆 アプローチ選定決定書
+
+**決定日時**: $(date '+%Y-%m-%d %H:%M:%S')  
+**決定者**: BOSS
+
+---
+
+## 📋 選定結果
+
+**選定アプローチ**: $selected_approach  
+**選定理由**: $decision_reason
+
+---
+
+## 🎯 実装方針
+
+$(if [[ "$selected_approach" == "hybrid" ]]; then
+    echo "### 統合アプローチ
+- 各Workerの長所を組み合わせ
+- 段階的な統合を実施
+- 品質を最優先に進行"
+else
+    echo "### 単一アプローチ
+- $selected_approach の実装を採用
+- 他のWorkerは支援に回る
+- 必要に応じて部分的に統合"
+fi)
+
+---
+
+## 📅 次のステップ
+
+1. 選定結果をチームに共有
+2. 実装計画の詳細化
+3. 統合作業の開始
+4. 品質保証の実施
+
+---
+
+**承認**: BOSS  
+**通知先**: 全Worker, PRESIDENT
+
+EOF
+    
+    echo -e "${GREEN}✅ 決定書を保存しました: $decision_file${NC}"
+    
+    # 決定をチームに通知
+    local decision_message="
+🏆 【アプローチ選定結果】$(date '+%Y-%m-%d %H:%M')
+
+チームの皆さん、お疲れ様でした。
+BOSSとして最適アプローチを選定しました。
+
+📋 選定結果：
+アプローチ: $selected_approach
+理由: $decision_reason
+
+🎯 今後の方針：
+$(if [[ "$selected_approach" == "hybrid" ]]; then
+    echo "- 各実装の良い点を統合
+- チーム全体で協力して完成させる
+- 品質を最優先に進める"
+else
+    echo "- $selected_approach の実装をベースに進行
+- 他のWorkerは改善・支援に注力
+- チーム一丸となって品質向上"
+fi)
+
+全員の努力に感謝します。
+最高の成果物を作り上げましょう！
+
+---
+BOSS
+    "
+    
+    # 決定を全Workerに通知
+    for worker in worker1 worker2 worker3; do
+        send_instruction_to_worker "$worker" "$decision_message"
+    done
+    
+    # PRESIDENTにも報告
+    send_instruction_to_worker "president" "
+📊 【BOSS決定報告】
+
+最適アプローチを選定しました。
+- 選定: $selected_approach
+- 理由: $decision_reason
+
+詳細: $decision_file
+
+---
+BOSS
+    "
+    
+    echo -e "${GREEN}✅ アプローチ選定完了${NC}"
+}
+
 # PRESIDENT報告（エスカレーション）
 escalate_to_president() {
     echo -e "${CYAN}🎯 PRESIDENT報告（エスカレーション）${NC}"
@@ -846,6 +1095,15 @@ main() {
             ;;
         "escalate")
             escalate_to_president
+            ;;
+        "evaluate")
+            evaluate_all_workers
+            ;;
+        "compare")
+            compare_worker_approaches
+            ;;
+        "decide")
+            decide_best_approach
             ;;
         "help"|"-h"|"--help")
             show_usage

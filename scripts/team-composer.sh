@@ -61,6 +61,8 @@ show_help() {
     report      分配レポートを生成
     full        全処理を実行 (analyze + assign + report)
     status      現在の分配状況を表示
+    compare     Worker実装結果を比較評価
+    collect     Worker成果物を収集
     help        このヘルプを表示
 
 オプション:
@@ -899,6 +901,312 @@ show_status() {
     fi
 }
 
+# Worker成果物を収集
+collect_worker_results() {
+    log_header "📥 Worker成果物収集"
+    
+    local session_name="multiagent"
+    local timestamp=$(date +%Y%m%d_%H%M%S)
+    local collection_dir="$REPORTS_DIR/collection_${timestamp}"
+    
+    # 収集ディレクトリを作成
+    mkdir -p "$collection_dir"
+    
+    # 各Workerのペインから出力を収集
+    log_info "tmux capture-paneを使用してWorker出力を収集中..."
+    
+    # Worker1 (UI/UX) - pane 1.1
+    log_info "Worker1の出力を収集中..."
+    tmux capture-pane -t "${session_name}:1.1" -p > "$collection_dir/worker1_output.txt"
+    
+    # Worker2 (Backend) - pane 1.2
+    log_info "Worker2の出力を収集中..."
+    tmux capture-pane -t "${session_name}:1.2" -p > "$collection_dir/worker2_output.txt"
+    
+    # Worker3 (Test/QA) - pane 1.3
+    log_info "Worker3の出力を収集中..."
+    tmux capture-pane -t "${session_name}:1.3" -p > "$collection_dir/worker3_output.txt"
+    
+    # BOSSの出力も収集 - pane 1.0
+    log_info "BOSSの出力を収集中..."
+    tmux capture-pane -t "${session_name}:1.0" -p > "$collection_dir/boss_output.txt"
+    
+    # 各Workerのワークツリーから実装状況を収集
+    local worktree_base="${TARGET_PROJECT_ROOT:-$PROJECT_ROOT}/worktrees"
+    
+    for worker in worker1 worker2 worker3; do
+        local worker_worktree="$worktree_base/$worker"
+        if [[ -d "$worker_worktree" ]]; then
+            log_info "${worker}のワークツリー情報を収集中..."
+            
+            # Git状態を取得
+            (cd "$worker_worktree" && git status --porcelain) > "$collection_dir/${worker}_git_status.txt" 2>&1
+            
+            # 最新のコミットログを取得
+            (cd "$worker_worktree" && git log --oneline -10) > "$collection_dir/${worker}_git_log.txt" 2>&1
+            
+            # 変更ファイルのdiffを取得
+            (cd "$worker_worktree" && git diff) > "$collection_dir/${worker}_git_diff.txt" 2>&1
+        fi
+    done
+    
+    # 収集レポートを生成
+    generate_collection_report "$collection_dir"
+    
+    log_success "Worker成果物を収集しました: $collection_dir"
+}
+
+# 収集レポートを生成
+generate_collection_report() {
+    local collection_dir="$1"
+    local report_file="$collection_dir/collection_report.md"
+    
+    cat > "$report_file" << EOF
+# 📥 Worker成果物収集レポート
+
+**収集日時**: $(date '+%Y-%m-%d %H:%M:%S')  
+**収集ディレクトリ**: $collection_dir
+
+---
+
+## 📊 収集概要
+
+### tmuxペイン出力
+- Worker1 (UI/UX): worker1_output.txt
+- Worker2 (Backend): worker2_output.txt  
+- Worker3 (Test/QA): worker3_output.txt
+- Boss: boss_output.txt
+
+### Git状態情報
+- 各Workerの変更状態: *_git_status.txt
+- 各Workerのコミット履歴: *_git_log.txt
+- 各Workerの変更差分: *_git_diff.txt
+
+---
+
+## 💬 最新の会話内容
+
+### Worker1 最新出力
+$(tail -20 "$collection_dir/worker1_output.txt" 2>/dev/null | head -10 || echo "出力なし")
+
+### Worker2 最新出力
+$(tail -20 "$collection_dir/worker2_output.txt" 2>/dev/null | head -10 || echo "出力なし")
+
+### Worker3 最新出力
+$(tail -20 "$collection_dir/worker3_output.txt" 2>/dev/null | head -10 || echo "出力なし")
+
+---
+
+## 🔧 実装状況サマリー
+
+### Worker1 Git状態
+$(head -5 "$collection_dir/worker1_git_status.txt" 2>/dev/null || echo "変更なし")
+
+### Worker2 Git状態
+$(head -5 "$collection_dir/worker2_git_status.txt" 2>/dev/null || echo "変更なし")
+
+### Worker3 Git状態
+$(head -5 "$collection_dir/worker3_git_status.txt" 2>/dev/null || echo "変更なし")
+
+---
+
+## 📝 次のステップ
+
+1. 収集した成果物を確認
+2. 'compare' コマンドで比較評価を実行
+3. 最適なアプローチを選定
+4. 統合作業を開始
+
+EOF
+    
+    log_info "収集レポートを生成しました: $report_file"
+}
+
+# Worker実装結果を比較評価
+compare_worker_approaches() {
+    log_header "🔍 Worker実装結果の比較評価"
+    
+    # 最新の収集ディレクトリを検索
+    local latest_collection=$(ls -td "$REPORTS_DIR"/collection_* 2>/dev/null | head -n1)
+    
+    if [[ -z "$latest_collection" || ! -d "$latest_collection" ]]; then
+        log_warning "収集データが見つかりません"
+        log_info "まず 'collect' コマンドを実行してください"
+        return 1
+    fi
+    
+    log_info "使用する収集データ: $latest_collection"
+    
+    local timestamp=$(date +%Y%m%d_%H%M%S)
+    local comparison_file="$REPORTS_DIR/comparison_${timestamp}.md"
+    
+    # 比較レポートのヘッダー
+    cat > "$comparison_file" << EOF
+# 🔍 Worker実装結果比較レポート
+
+**生成日時**: $(date '+%Y-%m-%d %H:%M:%S')  
+**収集データ**: $latest_collection
+
+---
+
+## 📊 比較評価サマリー
+
+EOF
+    
+    # 各Workerの進捗レポートを読み込んで分析
+    local workers=("worker1" "worker2" "worker3")
+    local approaches=()
+    
+    # 各Workerの分配書から方式案情報を抽出
+    for worker in "${workers[@]}"; do
+        local assignment_file=$(ls "$ASSIGNMENTS_DIR"/${worker}_approach_*.md 2>/dev/null | head -n1)
+        if [[ -f "$assignment_file" ]]; then
+            local approach_num=$(basename "$assignment_file" | sed 's/.*_approach_\([0-9]\)\.md/\1/')
+            local title=$(grep "^\*\*タイトル\*\*:" "$assignment_file" | sed 's/\*\*タイトル\*\*: *//' || echo "未設定")
+            local tech_stack=$(grep "^\*\*技術スタック\*\*:" "$assignment_file" | head -n1 | sed 's/\*\*技術スタック\*\*: *//' || echo "未設定")
+            approaches+=("${worker}:${approach_num}:${title}:${tech_stack}")
+            
+            cat >> "$comparison_file" << EOF
+### ${worker} - 方式案${approach_num}: ${title}
+
+**技術スタック**: ${tech_stack}
+
+EOF
+        fi
+    done
+    
+    # 評価マトリックスを生成
+    cat >> "$comparison_file" << EOF
+
+---
+
+## 📈 評価マトリックス
+
+| 評価項目 | Worker1 | Worker2 | Worker3 |
+|---------|---------|---------|---------|
+EOF
+    
+    # 各評価項目について分析
+    local criteria=(
+        "実装完了度"
+        "コード品質"
+        "テストカバレッジ"
+        "パフォーマンス"
+        "保守性"
+        "拡張性"
+        "ドキュメント"
+        "セキュリティ"
+    )
+    
+    for criterion in "${criteria[@]}"; do
+        echo -n "| $criterion " >> "$comparison_file"
+        
+        for worker in "${workers[@]}"; do
+            # Git状態から評価を推定（実際の実装では詳細な分析が必要）
+            local status_file="$latest_collection/${worker}_git_status.txt"
+            local score="⭐⭐⭐" # デフォルトスコア
+            
+            if [[ -f "$status_file" && -s "$status_file" ]]; then
+                local changes=$(wc -l < "$status_file")
+                if [[ $changes -gt 10 ]]; then
+                    score="⭐⭐⭐⭐⭐"
+                elif [[ $changes -gt 5 ]]; then
+                    score="⭐⭐⭐⭐"
+                fi
+            fi
+            
+            echo -n "| $score " >> "$comparison_file"
+        done
+        echo "|" >> "$comparison_file"
+    done
+    
+    # 技術的分析セクション
+    cat >> "$comparison_file" << EOF
+
+---
+
+## 🔧 技術的分析
+
+EOF
+    
+    # 各Workerの実装詳細を分析
+    for worker in "${workers[@]}"; do
+        cat >> "$comparison_file" << EOF
+### ${worker}の実装分析
+
+#### 変更ファイル数
+$(wc -l < "$latest_collection/${worker}_git_status.txt" 2>/dev/null || echo "0")
+
+#### 最新コミット
+$(head -5 "$latest_collection/${worker}_git_log.txt" 2>/dev/null || echo "コミットなし")
+
+#### 実装の特徴
+$(analyze_worker_implementation "$latest_collection" "$worker")
+
+---
+
+EOF
+    done
+    
+    # 推奨事項セクション
+    cat >> "$comparison_file" << EOF
+
+## 💡 推奨事項
+
+### 統合戦略
+1. **最適アプローチ**: [Bossが判断する項目]
+2. **統合優先順位**: [実装完了度と品質に基づく]
+3. **リスク要因**: [各実装の課題点]
+
+### 次のアクション
+- [ ] 最適アプローチの選定
+- [ ] 統合計画の策定
+- [ ] 不足機能の補完
+- [ ] 品質保証の実施
+
+---
+
+## 📊 総合評価
+
+**評価完了日時**: $(date '+%Y-%m-%d %H:%M:%S')
+
+EOF
+    
+    log_success "比較レポートを生成しました: $comparison_file"
+    
+    # レポートの要約を表示
+    echo ""
+    log_info "比較結果サマリー:"
+    for approach in "${approaches[@]}"; do
+        IFS=':' read -r worker num title tech <<< "$approach"
+        echo "  - $worker: 方式案$num「$title」"
+    done
+    
+    echo ""
+    log_info "詳細は以下のファイルを確認してください:"
+    echo "  $comparison_file"
+}
+
+# Worker実装を分析する補助関数
+analyze_worker_implementation() {
+    local collection_dir="$1"
+    local worker="$2"
+    
+    local diff_file="$collection_dir/${worker}_git_diff.txt"
+    
+    if [[ -f "$diff_file" && -s "$diff_file" ]]; then
+        # 変更行数を計算
+        local additions=$(grep -c "^+" "$diff_file" 2>/dev/null || echo "0")
+        local deletions=$(grep -c "^-" "$diff_file" 2>/dev/null || echo "0")
+        
+        echo "- 追加行数: $additions"
+        echo "- 削除行数: $deletions"
+        echo "- 主な変更: $(head -20 "$diff_file" | grep "^diff --git" | head -3 | sed 's/diff --git a\//  - /')"
+    else
+        echo "- 実装が開始されていないか、変更がありません"
+    fi
+}
+
 # メイン処理
 main() {
     local command="${1:-help}"
@@ -980,6 +1288,12 @@ main() {
             ;;
         status)
             show_status
+            ;;
+        compare)
+            compare_worker_approaches
+            ;;
+        collect)
+            collect_worker_results
             ;;
         help)
             show_help
